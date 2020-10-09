@@ -89,52 +89,53 @@ Koordinat Massiv[720];    //Создаем массив из расчета в 0
 //Задаем пин Slave select для SPI
 #define SS_PIN 10
 
-void Init_USART3()
-{
-	//PIO_Configure(PIOA, PIO_PERIPH_A, PIO_PA8A_URXD | PIO_PA9A_UTXD, PIO_DEFAULT);
-
-	//PMC->PMC_PCER0 = PMC_PCER0_PID8;  // UART power ON
-
-
-	///*Включаем UART, подавая на него тактирование*/
-	//pmc_enable_periph_clk(ID_USART3);
-
-	//* Отключаем DMA для приёма и для передачи */
-	USART3->US_PTCR = US_PTCR_RXTDIS | US_PTCR_TXTDIS;
-
-	//* Enable the pull up on the Rx and Tx pin */
-	PIOA->PIO_PUER = PIO_PD4B_TXD3 | PIO_PD5B_RXD3;
-
-	// Reset and disable receiver and transmitter
-	USART3->US_CR = US_CR_RSTRX | US_CR_RSTTX | US_CR_RXDIS | US_CR_TXDIS;
-
-	// Configure mode
-	uint32_t dwMode = US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | US_MR_PAR_NO;
-	uint32_t modeReg = dwMode & 0x00000E00;
-
-	USART3->US_MR = modeReg;
-
-	// Configure baudrate (asynchronous, no oversampling)
-	uint32_t dwBaudRate = 9600;
-	USART3->US_BRGR = (SystemCoreClock / dwBaudRate) >> 4;
-
-	/*Конфигурируем прерывания*/
-	/*Отключаем их*/
-	USART3->US_IDR = 0xFFFFFFFF;
-
-	/*Включаем нужные нам прерывания. */
-	USART3->US_IER = US_IER_RXRDY | US_IER_OVRE | US_IER_FRAME;
-
-	NVIC_EnableIRQ(USART3_IRQn);
-
-	/*Включаем передачу и приём*/
-	USART3->US_CR = US_CR_RXEN | US_CR_TXEN;
-
-}
+//void Init_USART3()
+//{
+//	//PIO_Configure(PIOA, PIO_PERIPH_A, PIO_PA8A_URXD | PIO_PA9A_UTXD, PIO_DEFAULT);
+//
+//	//PMC->PMC_PCER0 = PMC_PCER0_PID8;  // UART power ON
+//
+//
+//	///*Включаем UART, подавая на него тактирование*/
+//	//pmc_enable_periph_clk(ID_USART3);
+//
+//	//* Отключаем DMA для приёма и для передачи */
+//	USART3->US_PTCR = US_PTCR_RXTDIS | US_PTCR_TXTDIS;
+//
+//	//* Enable the pull up on the Rx and Tx pin */
+//	PIOA->PIO_PUER = PIO_PD4B_TXD3 | PIO_PD5B_RXD3;
+//
+//	// Reset and disable receiver and transmitter
+//	USART3->US_CR = US_CR_RSTRX | US_CR_RSTTX | US_CR_RXDIS | US_CR_TXDIS;
+//
+//	// Configure mode
+//	uint32_t dwMode = US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | US_MR_PAR_NO;
+//	uint32_t modeReg = dwMode & 0x00000E00;
+//
+//	USART3->US_MR = modeReg;
+//
+//	// Configure baudrate (asynchronous, no oversampling)
+//	uint32_t dwBaudRate = 9600;
+//	USART3->US_BRGR = (SystemCoreClock / dwBaudRate) >> 4;
+//
+//	/*Конфигурируем прерывания*/
+//	/*Отключаем их*/
+//	USART3->US_IDR = 0xFFFFFFFF;
+//
+//	/*Включаем нужные нам прерывания. */
+//	USART3->US_IER = US_IER_RXRDY | US_IER_OVRE | US_IER_FRAME;
+//
+//	NVIC_EnableIRQ(USART3_IRQn);
+//
+//	/*Включаем передачу и приём*/
+//	USART3->US_CR = US_CR_RXEN | US_CR_TXEN;
+//
+//}
 
 void setup() 
 {
 	Serial.begin(115200);
+	//Serial3.begin(115200);
 	// bind the RPLIDAR driver to the arduino hardware serial
 	 
 	lidar.begin(Serial1);
@@ -165,20 +166,34 @@ void setup()
 
 	time_start = millis(); // Время старта программы
 
-	Init_USART3();
+	//Init_USART3();
 }
 
 long abc = 0;
-void USART3_Handler(void) 
+void USART0_Handler(void) 		  // Функция которая подменяет стандартный обработчик
 { 
 	abc++;
-	Serial.print("a= ");
+	//Serial.println("!");
+
+	uint32_t status = USART0->US_CSR;  // считываем регистр статуса
+
+	//Did we receive new byte?
+	if ((status & US_CSR_RXRDY) == US_CSR_RXRDY)
+	{
+		uint8_t c = USART0->US_RHR;				//Read new byte from UART_RHR 
+		//Do something else
+	    my_USART0_Haldler();		 // Мой обработчик прерывания только для чтения
+	}
+	else
+	{
+		Serial1.IrqHandler();        // Стандартный обработчик прерывания
+	}
 }
-// IT handlers
-//void UART_Handler(void)
-//{
-//	NVIC_EnableIRQ((IRQn_Type)ID_UART);
-//}
+
+void my_USART0_Haldler()  // Мой обработчик прерывания по UART для приема данных с лидара
+{
+
+}
 
 void WriteByte_SPI(uint8_t CS_PIN, char* data)  // Указываем на каком пине устройство и с какого регистра нужно прочитать данные
 {
@@ -269,8 +284,9 @@ void loop()
 		time_a = millis();
 		Serial.print("abc= ");
 		Serial.println(abc);
+		abc = 0;
 	}
-	long a = micros();
+	//long a = micros();
 	if (IS_OK(lidar.waitPoint()))		// на передачу уходит примерно 100 микросекунд отстальное время, это ожидание в цикле по continue
 	{
 		long b = micros();
@@ -325,7 +341,7 @@ void loop()
 			//Serial.print(lidar.getCurrentPoint().angle);
 			//Serial.println("===");
 		}
-		long c = micros();
+		//long c = micros();
 
 		//perform data processing here... 
 		//if (millis() - time_start > 3000)
