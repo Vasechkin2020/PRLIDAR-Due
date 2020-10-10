@@ -47,23 +47,16 @@ RPLidar::~RPLidar()
 // open the given serial interface and try to connect to the RPLIDAR
 bool RPLidar::begin(HardwareSerial &serialobj)
 {
-	Serial.println(" begin= ");
     if (isOpen()) {
       end(); 
     }
-	Serial.println(" begin2= ");
 
     _bined_serialdev = &serialobj;
-	Serial.println(" begin3= ");
 
   //  _bined_serialdev->end();
-	Serial.println(" begin4= ");
 
     _bined_serialdev->begin(RPLIDAR_SERIAL_BAUDRATE);
-	Serial.println(" begin5= ");
 
-	Serial.println("2");
-	Serial.println("RPLIDAR_SERIAL_BAUDRATE");
 	Serial.print("RPLIDAR_SERIAL_BAUDRATE= ");
 	Serial.println(RPLIDAR_SERIAL_BAUDRATE);
 

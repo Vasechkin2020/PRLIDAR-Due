@@ -52,6 +52,8 @@
 // Commands without payload but have response
 #define RPLIDAR_CMD_GET_DEVICE_INFO      0x50
 #define RPLIDAR_CMD_GET_DEVICE_HEALTH    0x52
+#define RPLIDAR_CMD_GET_DEVICE_SAMPLERATE    0x59
+
 
 #if defined(_WIN32)
 #pragma pack(1)
@@ -92,6 +94,11 @@ typedef struct _rplidar_response_device_health_t {
     _u8   status;
     _u16  error_code;
 } __attribute__((packed)) rplidar_response_device_health_t;
+
+typedef struct _rplidar_response_device_SAMPLERATE {
+	_u16   Tstandard;
+	_u16   Texpress;
+} __attribute__((packed)) rplidar_response_device_SAMPLERATE_t;
 
 #if defined(_WIN32)
 #pragma pack()
