@@ -113,7 +113,7 @@ void loop()
 					//Massiv[angle_okrugl].time = dd - cc;// время потребовшееся на расчет	 должно быть меньше чем 1 секунда / число измерений например 2000 значит 500 микросекунд минус 100 на передачу данных из лидара
 
 				}
-				else	  // 
+				else	  // 																									   
 				{
 					Serial.print("Err getXY...");			//Ошибку на экран
 					Serial.print(" angle "); Serial.print(lidar.getCurrentPoint().angle);

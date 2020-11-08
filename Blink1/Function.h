@@ -3,12 +3,12 @@
 #include "RPLidar.h"
 // You need to create an driver instance 
 RPLidar lidar;
-#define RPLIDAR_MOTOR 17 // The PWM pin for control the speed of RPLIDAR's motor.
+#define RPLIDAR_MOTOR 7 // The PWM pin for control the speed of RPLIDAR's motor.
 // This pin should connected with the RPLIDAR's MOTOCTRL signal 
 
 #include <SPI.h>
 //Задаем пин Slave select для SPI
-#define SS_PIN 10
+#define SS_PIN 6
 
 
 const int count = 720;
